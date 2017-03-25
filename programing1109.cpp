@@ -1,64 +1,63 @@
-#include<stdio.h>
 #include <algorithm>
+#include <stdio.h>
 
-struct data{
-  int a,b;
-}pair[1000002];
 
-bool cmp(data a, data b){
-  return a.a<b.a?true:false;
+struct data {
+	long int a, b;
+} pair[100002], temp[100002];
+
+inline bool cmp(data a, data b) { return a.a < b.a ? true : false; }
+
+inline void copy(data *ai, data *bi) {
+	ai->a = bi->a;
+	ai->b = bi->b;
 }
 
-int temp[100002], a[100002];
 long long int cou = 0;
 
 void merge(int start, int end) {
-  int min = (start + end) / 2, i = 0, j = 0, b2f = 0;
-  int fi = start, bi = min, len = end - start;
-  if(min - start > 1){
-    merge(start, min);
-  }
-  if(end - min > 1){
-    merge(min, end);
-  }
-  while (fi < min && bi < end && i < len){
-    if (a[fi] > a[bi]) {
-      temp[i] = a[bi];
-      bi++;
-      b2f++;
-      printf("move b b2f%d cou%d fi%d bi%d i%d\n",b2f,cou,fi,bi,i);
-    } else {
-      temp[i] = a[fi];
-      fi++;
-      cou += b2f;
-      printf("move f b2f%d cou%d fi%d bi%d i%d\n",b2f,cou,fi,bi,i);
-    }
-    i++;
-  }
-  while (fi < min){
-    temp[i] = a[fi];
-    fi++;
-    cou += b2f;
-    i++;
-    printf("move f b2f%d cou%d fi%d bi%d i%d\n",b2f,cou,fi,bi,i);
-  }
-  while (j < i){
-    a[start + j] = temp[j];
-    j++;
-  }
+	int mid = (start + end) / 2;
+	int i = 0, j = 0;
+	int fi = start, bi = mid, len = end - start;
+	long long int b2f = 0;
+	if (mid - start > 1) {
+		merge(start, mid);
+	}
+	if (end - mid > 1) {
+		merge(mid, end);
+	}
+	while (fi < mid && bi < end && i < len) {
+		if (pair[fi].b > pair[bi].b) {
+			copy(&temp[i], &pair[bi]);
+			bi++;
+			b2f += temp[i].a;
+		} else {
+			copy(&temp[i], &pair[fi]);
+			fi++;
+			cou += b2f + temp[i].a * (bi - mid);
+		}
+		i++;
+	}
+	while (fi < mid) {
+		copy(&temp[i], &pair[fi]);
+		fi++;
+		cou += b2f + temp[i].a * (bi - mid);
+		i++;
+	}
+	while (j < i) {
+		copy(&pair[start + j], &temp[j]);
+		j++;
+	}
 }
 
-int main(){
-  int n, a, b;
-  scanf("%d", &n);
-  for (int i = 0; i < n; i++) {
-    scanf("%d %d", &a, &b);
-    pair[i].a = a;
-    pair[i].b = b;
-  }
-  std::sort(pair, pair + n, cmp);
-  for (size_t i = 0; i < n; i++) {
-    printf("%d %d\n", pair[i].a, pair[i].b);
-  }
-  return 0;
+int main() {
+	int n;
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		scanf("%ld %ld", &pair[i].a, &pair[i].b);
+	}
+	std::sort(pair, pair + n, cmp);
+	merge(0, n);
+	printf("%lld", cou);
+	return 0;
 }
